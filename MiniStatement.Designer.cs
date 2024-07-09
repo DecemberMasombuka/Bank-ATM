@@ -58,6 +58,7 @@
             btnClose.TabIndex = 10;
             btnClose.Text = "Close";
             btnClose.UseVisualStyleBackColor = false;
+            btnClose.Click += btnClose_Click;
             // 
             // btnExit
             // 

@@ -1,4 +1,7 @@
-﻿using System;
+﻿using iText.StyledXmlParser.Jsoup.Nodes;
+using iTextSharp.text;
+using iTextSharp.text.pdf;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -8,6 +11,8 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Xml.Linq;
+using Document = iTextSharp.text.Document;
+
 
 namespace Bank_ATM
 {
@@ -59,7 +64,7 @@ namespace Bank_ATM
             pministatement.Visible = false;
 
             //Stores the user's FullName and card number
-            loggedClient = new string[8] { id.ToString(), client.Getname() + " " + client.Getsurname(), client.GetcardNo().ToString(), "", "", "", "", "" };
+            loggedClient = new string[8] { id.ToString(), "", client.GetcardNo().ToString(), "", "", "", "", "" };
 
 
         }
@@ -144,14 +149,15 @@ namespace Bank_ATM
 
 
 
-                            //Stores  the deposited amount, trans Status, trans type, trans date and Balance
+                            //Stores  the deposited amount, description, trans date and Balance
                             id++;
                             loggedClient[0] = id.ToString();
-                            loggedClient[3] = now.ToString();
-                            loggedClient[4] = "Deposit";
-                            loggedClient[5] = "Successful";
-                            loggedClient[6] = ("R " + double.Parse(txtDeposit.Text).ToString());
-                            loggedClient[7] = "R " + client.Getbalance().ToString();
+                            loggedClient[1] = "Dep77765344B";
+                            loggedClient[2] = now.ToString();
+                            loggedClient[3] = "Deposit";
+                            //loggedClient[5] = "Successful";
+                            loggedClient[4] = ("R " + double.Parse(txtDeposit.Text).ToString());
+                            loggedClient[5] = "R " + client.Getbalance().ToString();
 
                             Populatedgv();
 
@@ -193,14 +199,15 @@ namespace Bank_ATM
                                     "\n" + "Available balance R" + client.Getbalance() + ",00");
 
 
-                                //Stores the Withdrawal status, trans Status, trans type, trans date and Balance
+                                //Stores the transcation ref number,Withdrawal amount, Description, trans date and Balance
                                 id++;
                                 loggedClient[0] = id.ToString();
-                                loggedClient[3] = now.ToString();
-                                loggedClient[4] = "Withdrawal";
-                                loggedClient[5] = "Successful";
-                                loggedClient[6] = ("R " + double.Parse(txtWithdrawAmount.Text).ToString());
-                                loggedClient[7] = "R " + client.Getbalance().ToString();
+                                loggedClient[1] = "Withdraw77765344B";
+                                loggedClient[2] = now.ToString();
+                                loggedClient[3] = "Withdrawal";
+                                //loggedClient[5] = "Successful";
+                                loggedClient[4] = ("-R " + double.Parse(txtWithdrawAmount.Text).ToString());
+                                loggedClient[5] = "R " + client.Getbalance().ToString();
 
                                 Populatedgv();
 
@@ -225,14 +232,15 @@ namespace Bank_ATM
                             {
                                 DialogResult d = MessageBox.Show("Insufficient Funds," + "Available Balance is R" + client.Getbalance());
 
-                                //Stores the Withdrawal status, trans Status, trans type, trans date and Balance
+                                //Stores the Withdrawal amount, transaction refnumber, Description, trans date and Balance
                                 id++;
                                 loggedClient[0] = id.ToString();
-                                loggedClient[3] = now.ToString();
-                                loggedClient[4] = "Withdrawal";
+                                loggedClient[1] = "Insuf77765344B";
+                                loggedClient[2] = now.ToString();
+                                loggedClient[3] = "Withdrawal";
                                 loggedClient[5] = "Insufficient Funds";
-                                loggedClient[6] = ("R " + double.Parse(txtWithdrawAmount.Text).ToString());
-                                loggedClient[7] = "R " + client.Getbalance().ToString();
+                                loggedClient[4] = ("R " + double.Parse(txtWithdrawAmount.Text).ToString());
+                                loggedClient[5] = "R " + client.Getbalance().ToString();
 
                                 Populatedgv();
 
@@ -271,6 +279,7 @@ namespace Bank_ATM
 
         private void btnExit_Click(object sender, EventArgs e)
         {
+
             this.Close();
         }
 
@@ -287,7 +296,7 @@ namespace Bank_ATM
 
         private void txtWithdrawAmount_TextChanged(object sender, EventArgs e)
         {
-            txtDeposit.MaxLength = 5;
+            txtWithdrawAmount.MaxLength = 4;
         }
 
         private void rbCustAmount_CheckedChanged(object sender, EventArgs e)
@@ -379,6 +388,8 @@ namespace Bank_ATM
         private void radioButton1_CheckedChanged(object sender, EventArgs e)
         {
             WithdrawOption(rbR20);
+            //Unchecks the rb
+            rbR20.Checked = false;
         }
 
 
@@ -386,36 +397,48 @@ namespace Bank_ATM
         private void radioButton2_CheckedChanged(object sender, EventArgs e)
         {
             WithdrawOption(rbR50);
+            //Unchecks the rb
+            rbR50.Checked = false;
         }
 
         //When 100 Option is Selected
         private void rbR150_CheckedChanged(object sender, EventArgs e)
         {
             WithdrawOption(rbR100);
+            //Unchecks the rb
+            rbR100.Checked = false;
         }
 
         //When R150 Option Is Selected
         private void rbR200_CheckedChanged(object sender, EventArgs e)
         {
             WithdrawOption(rbR150);
+            //Unchecks the rb
+            rbR150.Checked = false;
         }
 
         //When R200 Option Is Selected
         private void rbR200_CheckedChanged_1(object sender, EventArgs e)
         {
             WithdrawOption(rbR200);
+            //Unchecks the rb
+            rbR200.Checked = false;
         }
 
         //When R1000 Option Is Selected
         private void rbR1000_CheckedChanged(object sender, EventArgs e)
         {
             WithdrawOption(rbR1000);
+            //Unchecks the rb
+            rbR1000.Checked = false;
         }
 
         //When R2000 Option Is Selected
         private void rbR2000_CheckedChanged(object sender, EventArgs e)
         {
             WithdrawOption(rbR2000);
+            //Unchecks the rb
+            rbR2000.Checked = false;
         }
 
         //-------------------------------------------------------------------------------------------------------------
@@ -502,7 +525,9 @@ namespace Bank_ATM
             if (!found)
             {
                 dgv.Rows.Add(loggedClient);
+
                 btnGetStatement.Enabled = true;
+
             }
 
         }
@@ -549,34 +574,152 @@ namespace Bank_ATM
             MessageBox.Show("Thank you for using our Services ,GoodBye!!!");
             //DialogResult d = 
 
-
         }
 
-        //populates user's data into the DataGridView
+        //Creates a pdf statemet for the user.
         private void btnGetStatement_Click(object sender, EventArgs e)
-        {
 
+        {
+          
+            if (dgv.Rows.Count > 0)
+            {
+                
+                SaveFileDialog saveFileDialog = new SaveFileDialog();
+                saveFileDialog.Filter = "PDF (*.pdf)|*.pdf)";
+                saveFileDialog.FileName = "Result.pdf";
+                bool errormessage = false;
+
+                if(saveFileDialog.ShowDialog() == DialogResult.OK) 
+                
+                {
+                    if(File.Exists(saveFileDialog.FileName))
+                    {
+                        try 
+                        {
+                            File.Delete(saveFileDialog.FileName);
+                        }catch(Exception ex) 
+                        {
+                            errormessage = true;
+                            MessageBox.Show("File already exists "+ex.Message);
+                            throw;
+                        }
+                    
+                    }
+
+                    if (!errormessage)
+                    {
+                        try 
+                        {
+                            PdfPTable pTable = new PdfPTable(dgv.Columns.Count - 1);
+                            //Set the space before the table
+                            pTable.SpacingBefore = 20;
+                            pTable.DefaultCell.Padding = 2;
+                            pTable.WidthPercentage = 100;
+                            pTable.HorizontalAlignment = iTextSharp.text.Element.ALIGN_LEFT;
+
+                            iTextSharp.text.Font myFont = FontFactory.GetFont("Arial", 12, iTextSharp.text.Font.BOLD); //Bold Styling
+
+                            foreach (DataGridViewColumn col in dgv.Columns)
+                            {
+                                if(!col.Visible) continue; //Makes sure populated columns are only those visible ones.
+                               
+                                PdfPCell pCell = new PdfPCell(new Phrase(col.HeaderText,myFont));
+                                pTable.AddCell(pCell);
+                            }
+
+                            foreach (DataGridViewRow viewrow in dgv.Rows)
+                            {
+
+                                foreach (DataGridViewCell dcell in viewrow.Cells)
+                                {
+                                    if (!dgv.Columns[dcell.ColumnIndex].Visible) continue;
+                                    
+                                    //Cast the dgv cells(Objects) to string
+                                    pTable.AddCell((string)dcell.Value);
+                                }
+                            }
+
+                            using (FileStream fileStream = new FileStream(saveFileDialog.FileName, FileMode.Create)) 
+                            {
+                               Document document = new Document(PageSize.A4,8f,16f,8f,16f);
+                                PdfWriter.GetInstance(document, fileStream);
+                                document.Open();
+                                //Puts in the Bank's logo
+                                string imagepath = "C:\\Users\\User\\Documents\\Projects\\BANK Project\\Bank ATM (docs)\\Images\\BankLogo.jpg";
+                                iTextSharp.text.Image bankLogo = iTextSharp.text.Image.GetInstance(imagepath);
+
+                                //Resisize the bank logo image
+                                bankLogo.ScalePercent(15f);
+
+                                //Writes the BankName
+                                var bankPhrase= new Phrase();
+                                bankPhrase.Add(new Chunk("Finance Bank",myFont));
+                                bankPhrase.Add(new Chunk("\n"+"0987 Second street, Austin, Tx 123567-894" + "\n" + "1-000 87449 7"+ "\n" + "\n"));
+                                //iTextSharp.text.Font myFont = FontFactory.GetFont("Arial", 8, iTextSharp.text.Font.BOLD, new iTextSharp.text.BaseColor(0, 0, 255));
+                               
+                                
+                                //Writes the Customer's address
+                                var customerPhrase = new Phrase();
+                                customerPhrase.Add(new Chunk("Photography Bussiness, LLC", myFont));
+                                customerPhrase.Add(new Chunk("\n" + "Mr. " + client.Getname() + " " + client.Getsurname() + " 123 End street " + "\n" + "Austin City ,1-000 87449 7"));
+                                Paragraph customerdetails = new Paragraph();
+                                customerdetails.SpacingBefore = 20;
+
+                                //Writes the Account details
+                                Paragraph Accountdetails = new Paragraph("Account Name : "+"    Photography Business,LLC "+ "\n"+"Account Type : " + "     Savings Account " + "\n" +"Account Number  : " + loggedClient[2] + "\n" + "Statement Period : " + "DD/MM/YYYY" );
+                                //Accountdetails.Alignment = iTextSharp.text.Element.ALIGN_LEFT;
+                                Accountdetails.SpacingBefore = -55;
+                                Accountdetails.IndentationLeft = 310;
+
+                                document.Add(bankLogo);
+                                document.Add(bankPhrase); //Adds the Bank's Name
+                               // document.Add(bankdetails);
+                                document.Add(customerPhrase);
+                               // document.Add(customerdetails);
+                                document.Add(Accountdetails);
+                                document.Add(pTable);
+                                document.Close();
+                                fileStream.Close();
+
+                            }
+
+                            MessageBox.Show("Data Exported Successfully");
+
+                        }
+                        catch (Exception ex) 
+                        {
+                            MessageBox.Show("Error while Exporting "+ ex.Message);
+                        }
+                    }
+                
+                }
+            }
+            else 
+            {
+                MessageBox.Show("No Record to export");
+            }
+            
         }
 
         private void BankingScreen_Load(object sender, EventArgs e)
         {
             //DataGridView Setup
-            dgv.ColumnCount = 8;
+            dgv.ColumnCount = 6;
 
             dgv.Columns[0].Name = "ID";
-            dgv.Columns[1].Name = "FullName";
-            dgv.Columns[2].Name = "CardNumber";
-            dgv.Columns[3].Name = "Transaction Date";
-            dgv.Columns[4].Name = "Transaction type";
-            dgv.Columns[5].Name = "Transaction status";
-            dgv.Columns[6].Name = "Amount ";
-            dgv.Columns[7].Name = "Balance";
+           // dgv.Columns[1].Name = "DELETE";
+            dgv.Columns[1].Name = "Reference";
+            dgv.Columns[2].Name = "Transaction Date";
+            dgv.Columns[3].Name = "Description";
+           // dgv.Columns[5].Name = "DELETE";
+            dgv.Columns[4].Name = "Amount ";
+            dgv.Columns[5].Name = "Balance";
 
             //User cannot edit data in DataGridView
             dgv.ReadOnly = true;
 
             //Hides the ID column from the user
-            dgv.Columns["ID"].Visible = false;
+            dgv.Columns[0].Visible = false;
         }
     }
 }

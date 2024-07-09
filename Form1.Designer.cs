@@ -117,6 +117,7 @@
             btnChangePin.TabIndex = 9;
             btnChangePin.Text = "Change Pin";
             btnChangePin.UseVisualStyleBackColor = false;
+            btnChangePin.Click += btnChangePin_Click;
             // 
             // LoginScreen
             // 

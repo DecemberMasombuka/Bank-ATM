@@ -28,16 +28,16 @@ namespace Bank_ATM
         private void MiniStatement_Load(object sender, EventArgs e)
         {
             //DataGridView Setup
-            dgv.ColumnCount = 8;
+           // dgv.ColumnCount = 8;
 
-            dgv.Columns[0].Name = "ID";
-            dgv.Columns[1].Name = "FullName";
-            dgv.Columns[2].Name = "CardNumber";
-            dgv.Columns[3].Name = "Transaction Date";
-            dgv.Columns[4].Name = "Transaction type";
-            dgv.Columns[5].Name = "Transaction status";
-            dgv.Columns[6].Name = "Amount ";
-            dgv.Columns[7].Name = "Balance";
+           // dgv.Columns[0].Name = "ID";
+           // dgv.Columns[1].Name = "DELETE";
+           // dgv.Columns[2].Name = "Reference";
+           // dgv.Columns[3].Name = "Transaction Date";
+           // dgv.Columns[4].Name = "Description";
+           // dgv.Columns[5].Name = "DELETE";
+          //  dgv.Columns[6].Name = "Amount ";
+           // dgv.Columns[7].Name = "Balance";
 
 
         }
@@ -57,9 +57,12 @@ namespace Bank_ATM
 
         private void btnGetStatement_Click(object sender, EventArgs e)
         {
-            String[] g = new string[] { "j", "rer", "trtt", "yttr", "tttt", "gggg", "ggdddd" };
 
-            dgv.Rows.Add(g);
+        }
+
+        private void btnClose_Click(object sender, EventArgs e)
+        {
+
         }
     }
 }
