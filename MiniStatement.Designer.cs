@@ -33,6 +33,7 @@
             btnExit = new Button();
             btnGetStatement = new Button();
             pministatement = new Panel();
+            label1 = new Label();
             ((System.ComponentModel.ISupportInitialize)dgv).BeginInit();
             pministatement.SuspendLayout();
             SuspendLayout();
@@ -40,11 +41,12 @@
             // dgv
             // 
             dgv.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            dgv.Location = new Point(3, 132);
+            dgv.Location = new Point(2, 79);
+            dgv.Margin = new Padding(2);
             dgv.Name = "dgv";
             dgv.RowHeadersWidth = 62;
             dgv.RowTemplate.Height = 33;
-            dgv.Size = new Size(753, 328);
+            dgv.Size = new Size(527, 197);
             dgv.TabIndex = 0;
             dgv.CellContentClick += dgv_CellContentClick;
             // 
@@ -52,9 +54,10 @@
             // 
             btnClose.BackColor = Color.Gold;
             btnClose.Font = new Font("Sitka Small", 9F, FontStyle.Bold, GraphicsUnit.Point);
-            btnClose.Location = new Point(15, 30);
+            btnClose.Location = new Point(10, 18);
+            btnClose.Margin = new Padding(2);
             btnClose.Name = "btnClose";
-            btnClose.Size = new Size(147, 38);
+            btnClose.Size = new Size(103, 23);
             btnClose.TabIndex = 10;
             btnClose.Text = "Close";
             btnClose.UseVisualStyleBackColor = false;
@@ -64,9 +67,10 @@
             // 
             btnExit.BackColor = Color.Red;
             btnExit.Font = new Font("Sitka Small", 9F, FontStyle.Bold, GraphicsUnit.Point);
-            btnExit.Location = new Point(599, 30);
+            btnExit.Location = new Point(419, 18);
+            btnExit.Margin = new Padding(2);
             btnExit.Name = "btnExit";
-            btnExit.Size = new Size(147, 38);
+            btnExit.Size = new Size(103, 23);
             btnExit.TabIndex = 11;
             btnExit.Text = "Exit";
             btnExit.UseVisualStyleBackColor = false;
@@ -76,9 +80,10 @@
             // 
             btnGetStatement.BackColor = Color.Green;
             btnGetStatement.Font = new Font("Sitka Small", 9F, FontStyle.Bold, GraphicsUnit.Point);
-            btnGetStatement.Location = new Point(267, 66);
+            btnGetStatement.Location = new Point(187, 40);
+            btnGetStatement.Margin = new Padding(2);
             btnGetStatement.Name = "btnGetStatement";
-            btnGetStatement.Size = new Size(212, 38);
+            btnGetStatement.Size = new Size(148, 23);
             btnGetStatement.TabIndex = 12;
             btnGetStatement.Text = "Get Statement";
             btnGetStatement.UseVisualStyleBackColor = false;
@@ -86,27 +91,40 @@
             // 
             // pministatement
             // 
+            pministatement.Controls.Add(label1);
             pministatement.Controls.Add(dgv);
             pministatement.Controls.Add(btnGetStatement);
             pministatement.Controls.Add(btnExit);
             pministatement.Controls.Add(btnClose);
-            pministatement.Location = new Point(32, 48);
+            pministatement.Location = new Point(22, 29);
+            pministatement.Margin = new Padding(2);
             pministatement.Name = "pministatement";
-            pministatement.Size = new Size(759, 481);
+            pministatement.Size = new Size(531, 289);
             pministatement.TabIndex = 13;
+            // 
+            // label1
+            // 
+            label1.AutoSize = true;
+            label1.Location = new Point(249, 143);
+            label1.Name = "label1";
+            label1.Size = new Size(38, 15);
+            label1.TabIndex = 13;
+            label1.Text = "label1";
             // 
             // MiniStatement
             // 
-            AutoScaleDimensions = new SizeF(10F, 25F);
+            AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(830, 541);
+            ClientSize = new Size(581, 325);
             Controls.Add(pministatement);
+            Margin = new Padding(2);
             MaximizeBox = false;
             Name = "MiniStatement";
             Text = "MiniStatement";
             Load += MiniStatement_Load;
             ((System.ComponentModel.ISupportInitialize)dgv).EndInit();
             pministatement.ResumeLayout(false);
+            pministatement.PerformLayout();
             ResumeLayout(false);
         }
 
@@ -117,5 +135,6 @@
         private Button btnExit;
         private Button btnGetStatement;
         private Panel pministatement;
+        private Label label1;
     }
 }

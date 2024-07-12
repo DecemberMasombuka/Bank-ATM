@@ -7,12 +7,11 @@ namespace Bank_ATM
     public partial class LoginScreen : Form
     {
 
-        BankingScreen bs = new BankingScreen();
+       
         //Instantiating myconnection class
         Myconnection mycon = new Myconnection();
 
-
-
+        string myvar = null;
 
 
         public LoginScreen()
@@ -48,13 +47,14 @@ namespace Bank_ATM
 
 
         //LoginButton
-
         private void btnOk_Click(object sender, EventArgs e)
         {   //Create Bank_Client customers
             Bank_Clients client = new Bank_Clients("Sipho", "Mahlangu", 3333, 1234567890123, 450.00);
 
             // Validated users details
-           // bs.Show();
+            // bs.Show();
+
+            string customerId = "";
             if (isValidated())
             {
                 try
@@ -72,7 +72,12 @@ namespace Bank_ATM
                     {
 
                         this.Hide();
+                        reader.Read();
+                        customerId = reader["Customer_id"].ToString();
+                        BankingScreen bs = new BankingScreen(customerId);
                         bs.Show();
+
+
 
                     }
                     else
@@ -93,11 +98,10 @@ namespace Bank_ATM
 
             }
 
-           
-            
-
 
         }
+
+
 
         //Is user validated
         private bool isValidated()

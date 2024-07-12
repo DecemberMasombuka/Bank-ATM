@@ -5,8 +5,10 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
+using System.Data.SqlClient;
 using System.Drawing;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -20,8 +22,17 @@ namespace Bank_ATM
 
     public partial class BankingScreen : Form
     {
-        //Creates a new instance of the LoginScreen form
-        // LoginScreen ls = new LoginScreen();
+        //stores logged-In cutomer ID
+        private  String customerId= null;
+
+        //stores Logged-In customer's Account ID
+        private int accountId = 0;
+
+        //Stores Logged-In Customer Transaction Type
+        private string transactionType = null;
+
+        //Instantiating myconnection class
+        Myconnection mycon = new Myconnection();
 
         //Creates a new instance of the MiniStatement form
         MiniStatement ms = new MiniStatement();
@@ -37,6 +48,8 @@ namespace Bank_ATM
         // Unique Id to identify user transactions
         int id = 0;
 
+        //users's Balance
+        Decimal userBalance = 0;
 
         //transaction date
         DateTime now = DateTime.Now;
@@ -48,7 +61,7 @@ namespace Bank_ATM
         //bool variable to check if the Deposit button is clicked
         bool btnDepositClicked = false;
 
-        public BankingScreen()
+        public BankingScreen(string customerId)
         {
             //Close The logging Screen Form
 
@@ -66,16 +79,44 @@ namespace Bank_ATM
             //Stores the user's FullName and card number
             loggedClient = new string[8] { id.ToString(), "", client.GetcardNo().ToString(), "", "", "", "", "" };
 
+            this.customerId = customerId; //gets cutomerId from logging screen.
 
+
+            // label1.Text = strTextBox;
         }
 
 
 
         private void btnBalance_Click(object sender, EventArgs e)
         {
-            //Displays the logged-In user's balance
-            lblBalance.Text = "R " + client.Getbalance().ToString();
+            try
+            {
+                mycon.con.Open(); //Opens the connection
+                SqlCommand cmd = new SqlCommand("pr_accounts", mycon.con);
+                cmd.CommandType = CommandType.StoredProcedure;
 
+                cmd.Parameters.AddWithValue("@customer_id", customerId);
+
+                SqlDataReader reader = cmd.ExecuteReader();
+
+                if (reader.HasRows)
+                {
+                    //Displays the logged-In user's balance
+                    reader.Read();
+                    lblBalance.Text ="R " +  reader["balance"].ToString();
+                }
+                else
+                {
+                     MessageBox.Show("User Account does not exist", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    
+                }
+                mycon.con.Close(); //closes the connection
+
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message.ToString());
+            }
 
             //Hides Deposit and Withdraw from the user for 30 seconds
             btnWithdraw.Enabled = false;
@@ -94,7 +135,6 @@ namespace Bank_ATM
         {
             //Makes the deposit input available to the user
             gbDeposit.Visible = true;
-
 
             //Hides Withdraw and Balance Options from the user
             btnBalance.Enabled = false;
@@ -187,7 +227,203 @@ namespace Bank_ATM
 
                         if (txtWithdrawAmount.Text != "")
                         {
-                            //If the withdrawal Amount is less than the Balance
+
+                            try
+                            {
+                                mycon.con.Open(); //Opens the connection
+                                SqlCommand cmd = new SqlCommand("pr_accounts", mycon.con);
+                                cmd.CommandType = CommandType.StoredProcedure;
+
+                                cmd.Parameters.AddWithValue("@customer_id", customerId);
+
+                                SqlDataReader readerAccount = cmd.ExecuteReader();
+
+                                if (readerAccount.HasRows)
+                                {
+                                    
+                                    readerAccount.Read();
+                                    userBalance = readerAccount.GetDecimal(readerAccount.GetOrdinal("balance")); //gets user balance
+                                    readerAccount.Close();
+                                    //If the withdrawal Amount is less than the Balance
+                                    if (double.Parse(txtWithdrawAmount.Text) <  Decimal.ToDouble( userBalance))
+                                    {
+                                        
+                                        //Subract the withdrawal amount from the balance
+
+                                        cmd = new SqlCommand("pr_withdrawal",mycon.con);
+                                        cmd.CommandType= CommandType.StoredProcedure;
+                                        cmd.Parameters.AddWithValue("@withdrawamount", double.Parse(txtWithdrawAmount.Text));
+                                        cmd.Parameters.AddWithValue("@customer_id",customerId);
+
+                                       
+                                        SqlDataReader readerWithdraw= cmd.ExecuteReader();
+
+                                        if (readerWithdraw.HasRows)
+                                        {
+                                            readerWithdraw.Read();
+                                            userBalance = readerWithdraw.GetDecimal(readerWithdraw.GetOrdinal("balance")); //gets current user balance after withdrawal
+                                            accountId = readerWithdraw.GetInt32("account_id");
+                                            readerWithdraw.Close();
+                         
+                                            //Updates the user
+                                            DialogResult dresult = MessageBox.Show("An amount of R" + double.Parse(txtWithdrawAmount.Text) + ",00" +
+                                                " was Successfully withdrawn " +
+                                                "\n" + "Available balance R" + userBalance);
+
+
+                                            //Stores customer's transactions
+
+                                            cmd = new SqlCommand("pr_transactions", mycon.con);
+                                            cmd.CommandType = CommandType.StoredProcedure;
+                                            cmd.Parameters.AddWithValue("@accountid", accountId);
+                                            cmd.Parameters.AddWithValue("@transactiontype", "Withdrwal");
+                                            cmd.Parameters.AddWithValue("@amount", double.Parse(txtWithdrawAmount.Text));
+
+
+                                            //Resets the txtWithdrawAmount input
+                                            txtWithdrawAmount.Text = "";
+
+                                            //Checks if the user is done with Withdrawal process and enables other options for the user
+                                            if (dresult == DialogResult.OK)
+                                            {
+                                                btnDeposit.Enabled = true;
+                                                btnBalance.Enabled = true;
+                                            }
+
+
+                                            //Hides the withdrawal options from the user
+                                            flpMain.Visible = false;
+
+                                            txtWithdrawAmount.Visible = false;
+
+
+
+                                        }
+                                        else
+                                        {
+                                            MessageBox.Show("User Account does not exist", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                                        }
+
+                                      
+/*
+                                        client.Setbalance(client.Getbalance() - double.Parse(txtWithdrawAmount.Text));
+
+                                        //Updates the user
+                                        DialogResult d = MessageBox.Show("An amount of R" + double.Parse(txtWithdrawAmount.Text) + ",00" +
+                                            " was Successfully withdrawn " +
+                                            "\n" + "Available balance R" + client.Getbalance() + ",00");
+
+
+                                        //Stores the transcation ref number,Withdrawal amount, Description, trans date and Balance
+                                        id++;
+                                        loggedClient[0] = id.ToString();
+                                        loggedClient[1] = "Withdraw77765344B";
+                                        loggedClient[2] = now.ToString();
+                                        loggedClient[3] = "Withdrawal";
+                                        //loggedClient[5] = "Successful";
+                                        loggedClient[4] = ("-R " + double.Parse(txtWithdrawAmount.Text).ToString());
+                                        loggedClient[5] = "R " + client.Getbalance().ToString();
+
+                                        Populatedgv();
+
+                                        //Resets the txtWithdrawAmount input
+                                        txtWithdrawAmount.Text = "";
+
+                                        //Checks if the user is done with Withdrawal process and enables other options for the user
+                                        if (d == DialogResult.OK)
+                                        {
+                                            btnDeposit.Enabled = true;
+                                            btnBalance.Enabled = true;
+                                        }
+
+
+                                        //Hides the withdrawal options from the user
+                                        flpMain.Visible = false;
+
+                                        txtWithdrawAmount.Visible = false;*/
+
+                                    }
+                                    else
+                                    {
+                                        DialogResult d = MessageBox.Show("Insufficient Funds," + "Available Balance is R" + client.Getbalance());
+
+                                        //Stores the Withdrawal amount, transaction refnumber, Description, trans date and Balance
+                                        id++;
+                                        loggedClient[0] = id.ToString();
+                                        loggedClient[1] = "Insuf77765344B";
+                                        loggedClient[2] = now.ToString();
+                                        loggedClient[3] = "Withdrawal";
+                                        loggedClient[5] = "Insufficient Funds";
+                                        loggedClient[4] = ("R " + double.Parse(txtWithdrawAmount.Text).ToString());
+                                        loggedClient[5] = "R " + client.Getbalance().ToString();
+
+                                        Populatedgv();
+
+                                        //Resets the txtWithdrawAmount input
+                                        txtWithdrawAmount.Text = "";
+                                        txtWithdrawAmount.Visible = false;
+
+                                        //Checks if the user is done with Withdrawal process and enables other options for the user
+                                        if (d == DialogResult.OK)
+                                        {
+                                            btnDeposit.Enabled = true;
+                                            btnBalance.Enabled = true;
+                                        }
+
+
+                                        //Hides the withdrawal options from the user
+                                        flpMain.Visible = false;
+
+
+                                    }
+
+                                    //---------------------------------+++++++++++++++++_________________
+
+
+                                }
+                                else
+                                {
+                                    MessageBox.Show("User Account does not exist", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+
+                                }
+                                mycon.con.Close(); //closes the connection
+
+                            }
+                            catch (Exception ex)
+                            {
+                                MessageBox.Show(ex.Message.ToString());
+                            }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                         /*   //If the withdrawal Amount is less than the Balance
                             if (double.Parse(txtWithdrawAmount.Text) < client.Getbalance())
                             {
                                 //Subract the withdrawal amount from the balance
@@ -260,7 +496,7 @@ namespace Bank_ATM
                                 flpMain.Visible = false;
 
 
-                            }
+                            }*/
                         }
                         else
                         {
@@ -316,6 +552,10 @@ namespace Bank_ATM
             }
         }
 
+
+
+
+        //Withdrawal button
         private void btnWithdraw_Click(object sender, EventArgs e)
         {
             //Makes the withdraw options available to the user
@@ -380,7 +620,9 @@ namespace Bank_ATM
 
         }
 
-        //--------------------------------------WITHDRAW OPTION-----------------------------------
+
+
+ //--------------------------------------WITHDRAW OPTION-----------------------------------
 
 
 
